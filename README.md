@@ -1,4 +1,4 @@
-### README.md
+ ### README.md
 
 # Café Employee Manager
 
@@ -10,9 +10,11 @@ This is a full-stack application designed to manage cafes and their employees. I
 - [Installation](#installation)
   - [Backend Setup](#backend-setup)
   - [Frontend Setup](#frontend-setup)
+  - [Docker Setup](#docker-setup)
 - [Usage](#usage)
   - [Running the Backend](#running-the-backend)
   - [Running the Frontend](#running-the-frontend)
+  - [Running the Project with Docker](#running-the-project-with-docker)
 - [API Endpoints](#api-endpoints)
   - [Cafes Endpoints](#cafes-endpoints)
   - [Employees Endpoints](#employees-endpoints)
@@ -93,7 +95,26 @@ This is a full-stack application designed to manage cafes and their employees. I
 
 3. Set up the environment variables in a `.env` file at the root of the `frontend` folder:
    ```
-   VITE_API_URL=http://localhost:5000
+   VITE_API_URL=http://localhost:3000
+   ```
+
+### Docker Setup
+
+You can run the entire project using Docker to simplify setup and ensure compatibility across environments.
+
+1. Ensure you have [Docker](https://www.docker.com/products/docker-desktop) and [Docker Compose](https://www.docker.com/products/docker-desktop) have installed.
+2. Make sure MongoDB is running locally (using mongo-compass or terminal) or on a remote server before running the backend.
+3. Create a `.env` file in the backend directory:
+   ```
+   MONGO_URI=mongodb://localhost:27017
+   ```
+4. In the frontend directory, create a `.env` file with the following:
+   ```
+   VITE_API_URL=http://localhost:3000
+   ```
+5. Use the following command to build and start both the backend and MongoDB services:
+   ```bash
+   docker-compose up --build
    ```
 
 ---
@@ -117,6 +138,18 @@ This is a full-stack application designed to manage cafes and their employees. I
    ```
 
    The frontend will run at `http://localhost:5173`.
+
+### Running the Project with Docker
+
+1. Ensure Docker is installed and running on your system.
+2. Build and start the containers using Docker Compose:
+   ```bash
+   docker-compose up --build
+   ```
+3. MongoDB, the backend, and the frontend will be automatically started:
+   - Backend: `http://localhost:3000`
+   - Frontend: `http://localhost:5173`
+   - MongoDB: `mongodb://localhost:27017`
 
 ---
 
@@ -192,5 +225,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ### Notes
 
-- Make sure MongoDB is running locally or on a remote server before running the backend.
+- Make sure MongoDB is running locally (using mongo-compass or terminal)  or on a remote server before running the backend.
 - Validation is applied to ensure correct data entry in both the frontend and backend.
