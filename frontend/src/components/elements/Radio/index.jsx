@@ -21,12 +21,12 @@ export default function RadioGroupMenu({ onChange, name, defaultValue }) {
         onChange={(event) => onChange(event.target.value, name)} // Handle change event
       >
         <FormControlLabel 
-          value="male" 
+          value="Male" 
           control={<Radio />} 
           label="Male" 
         />
         <FormControlLabel 
-          value="female" 
+          value="Female" 
           control={<Radio />} 
           label="Female" 
         />

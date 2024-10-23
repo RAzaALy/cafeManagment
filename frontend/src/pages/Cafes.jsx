@@ -143,13 +143,14 @@ const Cafe = () => {
           }}
         />
       </div>
-
+      <div className="h-[80vh] overflow-auto">
       <AgGridReact
         rowData={rowData}
         columnDefs={columnDefs}
         domLayout="autoHeight"
         loading={isLoading }
       />
+      </div>
 
       {modalOpen && (
         <AddEditCafe

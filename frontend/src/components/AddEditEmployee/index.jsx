@@ -11,6 +11,7 @@ import { fetchCafes } from "../../services/cafeServices";
 
 
 const AddEditEmployee = ({ employeeData, isEditMode, onSubmitSuccess, isOpen, handleClose }) => {
+    const [editMode , setEditMode] = useState(isEditMode)
     const [employee, setEmployee] = useState({
         name: '',
         email: '',
@@ -25,7 +26,7 @@ const AddEditEmployee = ({ employeeData, isEditMode, onSubmitSuccess, isOpen, ha
         queryFn: fetchCafes, // Your function to fetch cafes
       });
 
-      console.log({cafes})
+
     
     useEffect(() => {
         if (isEditMode && employeeData) {
@@ -34,7 +35,7 @@ const AddEditEmployee = ({ employeeData, isEditMode, onSubmitSuccess, isOpen, ha
                 email: employeeData.email,
                 phone: employeeData.phone,
                 gender: employeeData.gender || '',
-                cafeId: employeeData.cafeId || '',
+                cafeId: employeeData.cafeDetails.cafeId || '',
             });
         } else {
             setEmployee({
@@ -48,6 +49,9 @@ const AddEditEmployee = ({ employeeData, isEditMode, onSubmitSuccess, isOpen, ha
     }, [isEditMode, employeeData]);
 
     const onChange = (value, name) => {
+        if(name === "cafeId") {
+        setEditMode(false)
+        }
         setEmployee({ ...employee, [name]: value });
     };
 
@@ -63,8 +67,6 @@ const AddEditEmployee = ({ employeeData, isEditMode, onSubmitSuccess, isOpen, ha
 
     const onSubmit = (event) => {
         event.preventDefault();
-        
-        
         onSubmitSuccess(employee, isEditMode);
         handleClose(); // Close the modal after submitting
     };
@@ -109,7 +111,7 @@ const AddEditEmployee = ({ employeeData, isEditMode, onSubmitSuccess, isOpen, ha
                  Assigned Café
           <span className="text-red-500">*</span>
         </label>
-                <SelectMenu title={"Cafes"} menuitems={cafes} value={employee.cafeId}  onChange={onChange} name={"cafeId"} />
+                <SelectMenu title={"Cafes"} menuitems={cafes} editEntity={editMode ? {cafeId : employeeData.cafeDetails.cafeId, name : employeeData.cafeDetails.name} : ""} value={employee.cafeId}  onChange={onChange} name={"cafeId"} />
 
                 <div className="flex justify-between items-center my-4">
                     <Button text={"Cancel"} variant="secondary" size="small" onClick={handleClose} />

@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo-data:/data/db
+
+  app:
+    build: .
+    container_name: my-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/usr/src/app
+    command: npm run dev
+
+volumes:
+  mongo-data:
