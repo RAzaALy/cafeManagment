@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from '@tanstack/react-router';
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -9,9 +10,10 @@ import AddEditCafe from "../components/AddEditCafe";
 import DeleteDialogBox from "../components/elements/Dialog";
 import { fetchCafes, addCafe, updateCafe, deleteCafe, fetchCafesByLocation } from "../services/cafeServices";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {debounce} from "lodash"
+import { debounce } from "lodash"
 
 const Cafe = () => {
+  const navigate = useNavigate();
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCafe, setSelectedCafe] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -85,6 +87,13 @@ const Cafe = () => {
     setCafeToDelete(cafe);
     setOpenDialog(true);
   };
+  const handleClick = (cafe) => {
+    console.log(cafe,'cafe')
+    navigate({
+      to: '/employees',
+      search: { cafeName: cafe.name }, // assuming each row has a unique 'id'
+    });
+  };
 
   const confirmDelete = () => {
     deleteCafeMutation.mutate(cafeToDelete.cafeId);
@@ -102,12 +111,28 @@ const Cafe = () => {
     setIsEditMode(false);
     setSelectedCafe(null);
   };
-
+// Button component to display employee count and handle click
+const CountButton = ({ value, data, onClick }) => {
+  return (
+    <button onClick={() => onClick(data)}>
+      {value}
+    </button>
+  );
+};
   const columnDefs = [
     { field: 'logo', headerName: "", cellRenderer: CustomImageComponent, flex: 1 },
     { field: 'name', flex: 1 },
-    { field: 'description', flex: 2 },
-    { field: 'employeeCount', headerName: 'Employees', flex: 1 },
+    { field: 'description', flex: 2},
+    {
+      field: 'employeeCount',
+      headerName: 'Employees',
+      flex: 1,
+      cellClass: "clickable-cell",
+      cellRenderer: CountButton,
+      cellRendererParams: {
+        onClick: handleClick,
+      },
+    },
     { field: 'location', flex: 2 },
     {
       headerName: "Actions",
@@ -123,7 +148,7 @@ const Cafe = () => {
 
   if (error) return <div>Error: {error.message}</div>;
 
-  const rowData = !searchLocation || bylocationLoading ? cafes || [] : cafesByLocation || [] ;
+  const rowData = !searchLocation || bylocationLoading ? cafes || [] : cafesByLocation || [];
 
   return (
     <div style={{ height: 400, width: "96%" }} className="ag-theme-alpine mx-auto">
@@ -144,12 +169,12 @@ const Cafe = () => {
         />
       </div>
       <div className="h-[80vh] overflow-auto">
-      <AgGridReact
-        rowData={rowData}
-        columnDefs={columnDefs}
-        domLayout="autoHeight"
-        loading={isLoading }
-      />
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={columnDefs}
+          domLayout="autoHeight"
+          loading={isLoading}
+        />
       </div>
 
       {modalOpen && (

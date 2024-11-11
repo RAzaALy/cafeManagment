@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -23,10 +23,22 @@ const Employees = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null); // For delete dialog
   const [searchByCafe, setSearchByCafe] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchByCafe); // State to hold the debounced value
 
   const queryClient = useQueryClient();
 
-  // Fetch employees using useQuery
+  useEffect(() => {
+    // Get 'cafeName' from the URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const cafeNameParam = urlParams.get("cafeName");
+
+    // Fetch employees by cafe only if 'cafeName' parameter exists
+    if (cafeNameParam) {
+      getCafeAllEmployees(cafeNameParam);
+    }
+  }, []); // This effect runs only once when the component mounts
+
+  // Fetch all employees when no specific cafe is selected
   const {
     data: employees,
     isLoading,
@@ -34,19 +46,25 @@ const Employees = () => {
   } = useQuery({
     queryKey: ["employees"],
     queryFn: fetchEmployees,
+    enabled: !searchByCafe, // Only fetch all employees when `searchByCafe` is empty
   });
 
+  // Fetch employees by cafe when `searchByCafe` is set
   const {
     data: employeesByCafe,
     isLoading: byCafeLoading,
     refetch,
-    isFetched,
-    isFetching,
   } = useQuery({
     queryKey: ["employees", { cafe: searchByCafe }],
     queryFn: () => fetchEmployeesByCafe(searchByCafe),
-    enabled: false,
+    enabled: !!searchByCafe, // Only fetch when `searchByCafe` has a value
   });
+
+  // Function to handle fetching employees by cafe name
+  const getCafeAllEmployees = (cafeName) => {
+    setSearchByCafe(cafeName); // Update searchByCafe state
+    refetch(); // Trigger refetch when searchByCafe changes
+  };
 
   // Add employee mutation
   const addEmployeeMutation = useMutation({
@@ -84,7 +102,6 @@ const Employees = () => {
   // Handlers for editing and deleting an employee
   const handleEdit = (employee) => {
     setIsEditMode(true);
-    console.log({employee , edit : true})
     setModalOpen(true);
     setSelectedEmployee(
       employees.find((employe) => employe.employeeId === employee.employeeId)
@@ -138,21 +155,25 @@ const Employees = () => {
   };
 
   // Loading and error handling
-  // if (isLoading) return <div>Loading...</div>;
+  if (isLoading || byCafeLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
+  // Use the appropriate row data based on whether `searchByCafe` is set
   const rowData =
     !searchByCafe || byCafeLoading ? employees || [] : employeesByCafe || [];
 
-  console.log({ byCafeLoading, isFetched, isFetching }, "test");
-
+  // Debounced search handler
   const handleChange = (e) => {
-    const value = e.target.value; // Get the current input value
+    const value = e.target.value;
     setSearchByCafe(value); // Update local input state
-    setTimeout(() => {
-      refetch(); //like this one only runs that time
-    }, 500);
+
+    // Set debounced value after a delay
+    clearTimeout(debouncedSearch);
+    setDebouncedSearch(setTimeout(() => {
+      refetch(); // Refetch employees after debounce delay
+    }, 500)); 
   };
+
   return (
     <>
       <div
